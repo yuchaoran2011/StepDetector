@@ -11,8 +11,6 @@ import android.util.Log;
  * Step detector base class. Can be used as a dummy step detector. Doesn't
  * detect any steps.
  * 
- * @author Michal Holcik
- * 
  */
 public class StepDetector implements SensorEventListener, IStepDetector {
 

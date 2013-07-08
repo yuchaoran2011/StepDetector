@@ -6,6 +6,7 @@ import java.util.Queue;
 import thirdparty.fft.Complex;
 import thirdparty.fft.FFT;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,8 +25,6 @@ import cz.muni.fi.sandbox.dsp.filters.SineWaveCrossCorrelationBank;
 import cz.muni.fi.sandbox.utils.ColorRamping;
 
 /**
- * 
- * @author Michal Holcik
  *
  */
 public class StepDetectionFFT extends Activity {
@@ -62,6 +61,7 @@ public class StepDetectionFFT extends Activity {
 			super.onSizeChanged(w, h, oldw, oldh);
 		}
 
+		@SuppressLint("DrawAllocation")
 		@Override
 		protected void onDraw(Canvas canvas) {
 			synchronized (this) {

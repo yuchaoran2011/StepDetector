@@ -4,8 +4,6 @@ package cz.muni.fi.sandbox.service.stepdetector;
  * StrideLengthEstimator class, contains model for estimation of the stride
  * length based on stride duration.
  * 
- * @author Michal Holcik
- * 
  */
 public class StrideLengthEstimator {
 

@@ -84,7 +84,10 @@ public class StepDetectionDemo extends Activity {
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 			double movingAverage1 = MovingAverageStepDetector.MA1_WINDOW;
 			double movingAverage2 = MovingAverageStepDetector.MA2_WINDOW;
-			double powerCutoff = MovingAverageStepDetector.POWER_CUTOFF_VALUE;
+			
+			double lowPowerCutoff = MovingAverageStepDetector.LOW_POWER_CUTOFF_VALUE;
+			double highPowerCutoff = MovingAverageStepDetector.HIGH_POWER_CUTOFF_VALUE;
+			
 			if (prefs != null) {
 				try {
 					movingAverage1 = Double.valueOf(prefs.getString(
@@ -99,14 +102,20 @@ public class StepDetectionDemo extends Activity {
 					e.printStackTrace();
 				}
 				try {
-					powerCutoff = Double.valueOf(prefs.getString(
-							"step_detection_power_cutoff_preference", "1000"));
+					lowPowerCutoff = Double.valueOf(prefs.getString(
+							"step_detection_low_power_cutoff_preference", "6000"));
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
+				try {
+					highPowerCutoff = Double.valueOf(prefs.getString(
+							"step_detection_upper_power_cutoff_preference", "25000"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
 			}
 			
-			mStepDetector = new MovingAverageStepDetector(movingAverage1, movingAverage2, powerCutoff);
+			mStepDetector = new MovingAverageStepDetector(movingAverage1, movingAverage2, lowPowerCutoff, highPowerCutoff);
 			// mStepDetector = new MovingAverageStepDetector();
 
 			mCC = new ContinuousConvolution(new SinXPiWindow(mMASize));
@@ -212,10 +221,14 @@ public class StepDetectionDemo extends Activity {
 			canvas.drawLine(mLastX, mLastValues[3], newX, v, paint);
 			mLastValues[3] = v;
 			
+			
 			// draw power cutoff threshold
-			v = mYOffset[1] + mStepDetector.getPowerThreshold() * mScale[2];
+			
+			v = mYOffset[1] + mStepDetector.getLowPowerThreshold() * mScale[2];
 			paint.setColor(Color.RED);
 			canvas.drawLine(0, v, mWidth, v, paint);
+			
+			
 
 			// draw lines
 			for (int i = 0; i < 3; i++) {
@@ -263,7 +276,7 @@ public class StepDetectionDemo extends Activity {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			synchronized (this) {
-				if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+				if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
 					processAccelerometerEvent(event);
 					freqCounter.push(event.timestamp);
 					float rate = freqCounter.getRateF();
@@ -304,7 +317,7 @@ public class StepDetectionDemo extends Activity {
 		super.onCreate(savedInstanceState);
 
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mAccelerometer = getSensor(Sensor.TYPE_ACCELEROMETER, "accelerometer");
+		mAccelerometer = getSensor(Sensor.TYPE_LINEAR_ACCELERATION, "accelerometer");
 		
 		mGraphView = new GraphView(this);
 		setContentView(mGraphView);
