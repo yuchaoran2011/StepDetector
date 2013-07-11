@@ -25,13 +25,14 @@ import cz.muni.fi.sandbox.dsp.filters.SinXPiWindow;
 import cz.muni.fi.sandbox.service.stepdetector.MovingAverageStepDetector.MovingAverageStepDetectorState;
 
 public class StepDetectionDemo extends Activity {
-	/** Tag string for our debug logs */
+
 	private static final String TAG = "Sensors";
 
 	private SensorManager mSensorManager;
 	private GraphView mGraphView;
 	private Sensor mAccelerometer;
 
+	
 	private Sensor getSensor(int sensorType, String sensorName) {
 
 		Sensor sensor = mSensorManager.getDefaultSensor(sensorType);
@@ -43,6 +44,8 @@ public class StepDetectionDemo extends Activity {
 		return sensor;
 	}
 
+	
+	
 	private class GraphView extends View implements SensorEventListener {
 		private Bitmap mBitmap;
 		private Paint mPaint = new Paint();
@@ -66,6 +69,7 @@ public class StepDetectionDemo extends Activity {
 		private FrequencyCounter freqCounter;
 		private boolean mTouched;
 
+		
 		public GraphView(Context context) {
 			super(context);
 			mColors[0] = Color.argb(192, 255, 64, 64);
@@ -90,26 +94,22 @@ public class StepDetectionDemo extends Activity {
 			
 			if (prefs != null) {
 				try {
-					movingAverage1 = Double.valueOf(prefs.getString(
-							"short_moving_average_window_preference", "0.2"));
+					movingAverage1 = Double.valueOf(prefs.getString("short_moving_average_window_preference", "0.2"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
 				try {
-					movingAverage2 = Double.valueOf(prefs.getString(
-							"long_moving_average_window_preference", "1.0"));
+					movingAverage2 = Double.valueOf(prefs.getString("long_moving_average_window_preference", "1.0"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
 				try {
-					lowPowerCutoff = Double.valueOf(prefs.getString(
-							"step_detection_low_power_cutoff_preference", "6000"));
+					lowPowerCutoff = Double.valueOf(prefs.getString("step_detection_low_power_cutoff_preference", "2000"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
 				try {
-					highPowerCutoff = Double.valueOf(prefs.getString(
-							"step_detection_upper_power_cutoff_preference", "25000"));
+					highPowerCutoff = Double.valueOf(prefs.getString("step_detection_upper_power_cutoff_preference", "55000"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
@@ -122,6 +122,8 @@ public class StepDetectionDemo extends Activity {
 			freqCounter = new FrequencyCounter(20);
 		}
 		
+		
+		
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
 				
@@ -133,6 +135,8 @@ public class StepDetectionDemo extends Activity {
 			}
 			return true;
 		}
+		
+		
 
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -143,9 +147,11 @@ public class StepDetectionDemo extends Activity {
 			mYOffset[1] = h * 0.25f;
 			mYOffset[2] = h * 0.25f;
 			mYOffset[3] = h * 0.75f;
+			
 			mScale[0] = -(h * 0.5f * (1.0f / (SensorManager.STANDARD_GRAVITY * 2)));
 			mScale[1] = -(h * 0.5f * (1.0f / (SensorManager.MAGNETIC_FIELD_EARTH_MAX)));
 			mScale[2] = -(h * 0.5f * (1.0f / 100000));
+			
 			mWidth = w;
 			mHeight = h;
 			if (mWidth < mHeight) {
@@ -157,6 +163,8 @@ public class StepDetectionDemo extends Activity {
 			super.onSizeChanged(w, h, oldw, oldh);
 		}
 
+		
+		
 		@Override
 		protected void onDraw(Canvas canvas) {
 			synchronized (this) {
@@ -168,8 +176,7 @@ public class StepDetectionDemo extends Activity {
 						final Canvas cavas = mCanvas;
 						final float yoffset = mYOffset2;
 						final float maxx = mMaxX;
-						final float oneG = SensorManager.STANDARD_GRAVITY
-								* mScale[0];
+						final float oneG = SensorManager.STANDARD_GRAVITY * mScale[0];
 						paint.setColor(0xFFAAAAAA);
 						cavas.drawColor(0xFFFFFFFF);
 						cavas.drawLine(0, yoffset, maxx, yoffset, paint);
@@ -182,6 +189,11 @@ public class StepDetectionDemo extends Activity {
 				}
 			}
 		}
+
+		
+		
+		
+		
 
 		float mConvolution, mLastConvolution;
 
@@ -196,7 +208,7 @@ public class StepDetectionDemo extends Activity {
 
 			float[] maValues = new float[4];
 			boolean stepDetected = false;
-			boolean signalPowerCutoff = true;
+			boolean signalPowerOutOfRange = true;
 
 			maValues[0] = -state.values[0];
 			maValues[1] = -state.values[1];
@@ -204,22 +216,32 @@ public class StepDetectionDemo extends Activity {
 			maValues[3] = state.values[3];
 
 			stepDetected = state.states[0];
-			signalPowerCutoff = state.states[1];
+			signalPowerOutOfRange = state.states[1];
 
 			float v = 0;
 
+			
+			
+			
 			// draw convolution
 			v = mYOffset[1] + mConvolution * mScale[0]; // (float)(-mHeight *
 														// 0.5 / 1000.0);
 			paint.setColor(Color.BLACK);
 			canvas.drawLine(mLastX, mLastConvolution, newX, v, paint);
 			mLastConvolution = v;
+			
 
+			
+			
+			
 			// draw power
 			v = mYOffset[1] + maValues[3] * mScale[2];
 			paint.setColor(mColors[4]);
 			canvas.drawLine(mLastX, mLastValues[3], newX, v, paint);
 			mLastValues[3] = v;
+			
+			
+			
 			
 			
 			// draw power cutoff threshold
@@ -229,7 +251,7 @@ public class StepDetectionDemo extends Activity {
 			canvas.drawLine(0, v, mWidth, v, paint);
 			
 			
-
+			
 			// draw lines
 			for (int i = 0; i < 3; i++) {
 				v = mYOffset[i] + maValues[i] * mScale[0];
@@ -237,16 +259,22 @@ public class StepDetectionDemo extends Activity {
 				canvas.drawLine(mLastX, mLastValues[i], newX, v, paint);
 				mLastValues[i] = v;
 			}
+			
+			
 
+			
 			// draw step
 			if (stepDetected) {
-				if (signalPowerCutoff) {
+				if (signalPowerOutOfRange) {
 					paint.setColor(Color.RED);
 				} else {
 					paint.setColor(Color.GREEN);
 				}
-				canvas.drawCircle(newX, v, 10, paint);
+				canvas.drawCircle(newX, v, 5, paint);
 			}
+			
+			
+			
 			
 			// draw touch event
 			if (mTouched) {
@@ -263,20 +291,26 @@ public class StepDetectionDemo extends Activity {
 				paint.setStyle(Style.FILL);
 			}
 			
+			
 			paint.setColor(Color.WHITE);
 			canvas.drawRect(0, 0, mWidth, 30, paint);
 			paint.setColor(Color.BLACK);
 			canvas.drawText("sensor rate: " + freqCounter.getRateF(), 0, 20, paint);
+			
 
 			mLastX += mSpeed;
 
 			invalidate();
 		}
+		
+		
+		
+		
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			synchronized (this) {
-				if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+				if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 					processAccelerometerEvent(event);
 					freqCounter.push(event.timestamp);
 					float rate = freqCounter.getRateF();
@@ -285,8 +319,10 @@ public class StepDetectionDemo extends Activity {
 					invalidate();
 				}
 			}
-
 		}
+		
+		
+		
 
 		public void processAccelerometerEvent(SensorEvent event) {
 			// Log.d(TAG, "sensor: " + sensor + ", x: " + values[0] + ", y: " +
@@ -303,8 +339,10 @@ public class StepDetectionDemo extends Activity {
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
 			// TODO Auto-generated method stub
 		}
-
 	}
+	
+	
+	
 
 	/**
 	 * Initialization of the Activity after it is first created. Must at least
@@ -317,7 +355,7 @@ public class StepDetectionDemo extends Activity {
 		super.onCreate(savedInstanceState);
 
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mAccelerometer = getSensor(Sensor.TYPE_LINEAR_ACCELERATION, "accelerometer");
+		mAccelerometer = getSensor(Sensor.TYPE_ACCELEROMETER, "accelerometer");
 		
 		mGraphView = new GraphView(this);
 		setContentView(mGraphView);
@@ -328,8 +366,7 @@ public class StepDetectionDemo extends Activity {
 		super.onResume();
 
 		if (mAccelerometer != null)
-			mSensorManager.registerListener(mGraphView, mAccelerometer,
-					SensorManager.SENSOR_DELAY_FASTEST);
+			mSensorManager.registerListener(mGraphView, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 		/*
 		 * if (mMagnetometer != null) mSensorManager.registerListener(this,
 		 * mMagnetometer, SensorManager.SENSOR_DELAY_FASTEST); if

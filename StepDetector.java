@@ -15,6 +15,7 @@ import android.util.Log;
 public class StepDetector implements SensorEventListener, IStepDetector {
 
 	protected ArrayList<IStepListener> mStepListeners = new ArrayList<IStepListener>();
+	
 
 	public void addStepListener(IStepListener sl) {
 		if (sl != null) {

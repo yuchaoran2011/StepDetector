@@ -347,8 +347,7 @@ public class StepDetectionFFT extends Activity {
 		super.onResume();
 
 		if (mAccelerometer != null)
-			mSensorManager.registerListener(mGraphView, mAccelerometer,
-					SensorManager.SENSOR_DELAY_FASTEST);
+			mSensorManager.registerListener(mGraphView, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 		/*
 		 * if (mMagnetometer != null) mSensorManager.registerListener(this,
 		 * mMagnetometer, SensorManager.SENSOR_DELAY_FASTEST); if

@@ -1,8 +1,6 @@
 package cz.muni.fi.sandbox.service.stepdetector;
 
 /**
- * 
- * @author Michal Holcik
  *
  */
 public class StepEvent {

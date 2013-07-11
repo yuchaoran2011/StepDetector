@@ -1,16 +1,15 @@
 package cz.muni.fi.sandbox.service.stepdetector;
 
+import java.util.Random;
+
 /**
  * StrideLengthEstimator class, contains model for estimation of the stride
  * length based on stride duration.
  * 
  */
 public class StrideLengthEstimator {
-
-	private static final double DEFAULT_STRIDE_LENGTH = 0.7;
 	
-	private double stepLength;
-	private double factor;
+	private double height;
 	
 	/**
 	 * Constructor
@@ -21,9 +20,8 @@ public class StrideLengthEstimator {
 	 *            is a linear correction factor (leg length or person height can
 	 *            be used as basis)
 	 */
-	public StrideLengthEstimator(double stepLength, double factor) {
-		this.stepLength = stepLength;
-		this.factor = factor;
+	public StrideLengthEstimator(double height) {
+		this.height = height;
 	}
 
 	/**
@@ -34,7 +32,15 @@ public class StrideLengthEstimator {
 	 *            stride duration
 	 */
 	public double getStrideLengthFromDuration(double duration) {
-		double retval = DEFAULT_STRIDE_LENGTH;
-		return factor * (0.3608 + 0.1639 / duration);
+		//return factor * (0.3608 + 0.1639 / duration) * DEFAULT_STRIDE_LENGTH;
+		Random ranGen= new Random();
+		double standardNoise = ranGen.nextGaussian(); 
+		double zScore = 0.15;
+		double correctedNoise = standardNoise * zScore; 
+		double strideLength = height * 0.415 + correctedNoise;
+		if (strideLength <= 1.0)
+			return strideLength;
+		else 
+			return Double.NaN;
 	}
 }

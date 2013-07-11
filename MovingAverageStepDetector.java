@@ -22,7 +22,7 @@ public class MovingAverageStepDetector extends StepDetector {
 	private CumulativeSignalPowerTD asp;
 	private boolean mMASwapState;
 	private boolean stepDetected;
-	private boolean signalPowerCutoff;
+	private boolean signalPowerOutOfRange;
 	private long mLastStepTimestamp;
 	private double strideDuration;
 	
@@ -32,10 +32,13 @@ public class MovingAverageStepDetector extends StepDetector {
 	@SuppressWarnings("unused")
 	private static final long POWER_WINDOW = SECOND_IN_NANOSECONDS / 10;
 	
-	public static final float LOW_POWER_CUTOFF_VALUE = 6000.0f;
-	public static final float HIGH_POWER_CUTOFF_VALUE = 25000.0f;
+	public static final float LOW_POWER_CUTOFF_VALUE = 2000.0f;
+	public static final float HIGH_POWER_CUTOFF_VALUE = 55000.0f;
+	
 	
 	private static final double MAX_STRIDE_DURATION = 2.0; // in seconds
+	private static final double MIN_STRIDE_DURATION = 0.1;
+	
 	
 	private double mWindowMa1;
 	private double mWindowMa2;
@@ -61,7 +64,7 @@ public class MovingAverageStepDetector extends StepDetector {
 		sp = new SignalPowerTD(mWindowPower);
 		asp = new CumulativeSignalPowerTD();
 		stepDetected = false;
-		signalPowerCutoff = true;
+		signalPowerOutOfRange = true;
 	}
 
 	public class MovingAverageStepDetectorState {
@@ -78,7 +81,7 @@ public class MovingAverageStepDetector extends StepDetector {
 	public MovingAverageStepDetectorState getState() {
 		return new MovingAverageStepDetectorState(new float[] { maValues[0],
 				maValues[1], maValues[2], maValues[3] }, new boolean[] {
-				stepDetected, signalPowerCutoff }, strideDuration);
+				stepDetected, signalPowerOutOfRange }, strideDuration);
 	}
 
 	public float getLowPowerThreshold() {
@@ -116,14 +119,14 @@ public class MovingAverageStepDetector extends StepDetector {
 		asp.push(timestamp, maValues[1] - maValues[2]);
 		// maValues[3] = (float)sp.getPower();
 		maValues[3] = (float) asp.getValue();
-		signalPowerCutoff = (maValues[3] < mLowPowerCutoff) || (maValues[3] > mHighPowerCutoff);
+		signalPowerOutOfRange = (maValues[3] < mLowPowerCutoff) || (maValues[3] > mHighPowerCutoff);
 
 		if (stepDetected) {
 			asp.reset();
 		}
 
 		// step event
-		if (stepDetected && signalPowerCutoff) {
+		if (stepDetected && signalPowerOutOfRange) {
 			if (maValues[3] < mLowPowerCutoff)
 				Log.d("Invalid Step", "Power too low!");
 			if (maValues[3] > mHighPowerCutoff)
@@ -131,12 +134,13 @@ public class MovingAverageStepDetector extends StepDetector {
 		}
 		
 		
-		if (stepDetected && !signalPowerCutoff) {
+		if (stepDetected && !signalPowerOutOfRange) {
+			
 			strideDuration = getStrideDuration();
 			
-			if (strideDuration != Double.NaN) {
-				Log.d("Stride Length", Double.valueOf(new StrideLengthEstimator(0.5, 1.75).getStrideLengthFromDuration(strideDuration)).toString());
+			if (strideDuration != Double.NaN && strideDuration <= MAX_STRIDE_DURATION && strideDuration >= MIN_STRIDE_DURATION) {
 				notifyOnStep(new StepEvent(1.0, strideDuration));
+				Log.d("Stride Length", Double.valueOf(new StrideLengthEstimator(1.76).getStrideLengthFromDuration(strideDuration)).toString());
 			}
 			else {
 				Log.d("Invalid Stride Duration", "Stride Duration NaN!");
@@ -169,7 +173,7 @@ public class MovingAverageStepDetector extends StepDetector {
 		// Log.d(TAG, "sensor: " + sensor + ", x: " + values[0] + ", y: " +
 		// values[1] + ", z: " + values[2]);
 		synchronized (this) {
-			if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+			if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 				processAccelerometerValues(event.timestamp, event.values);
 			}
 		}
