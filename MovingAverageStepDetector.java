@@ -33,7 +33,7 @@ public class MovingAverageStepDetector extends StepDetector {
 	private static final long POWER_WINDOW = SECOND_IN_NANOSECONDS / 10;
 	
 	public static final float LOW_POWER_CUTOFF_VALUE = 2000.0f;
-	public static final float HIGH_POWER_CUTOFF_VALUE = 55000.0f;
+	public static final float HIGH_POWER_CUTOFF_VALUE = 90000.0f;
 	
 	
 	private static final double MAX_STRIDE_DURATION = 2.0; // in seconds
@@ -68,15 +68,16 @@ public class MovingAverageStepDetector extends StepDetector {
 	}
 
 	public class MovingAverageStepDetectorState {
-		float[] values;
-		boolean[] states;
-		double duration;
+		public float[] values;
+		public boolean[] states;
+		public double duration;
 
 		MovingAverageStepDetectorState(float[] values, boolean[] states, double duration) {
 			this.values = values;
 			this.states = states;
 		}
 	}
+	
 
 	public MovingAverageStepDetectorState getState() {
 		return new MovingAverageStepDetectorState(new float[] { maValues[0],
@@ -137,10 +138,16 @@ public class MovingAverageStepDetector extends StepDetector {
 		if (stepDetected && !signalPowerOutOfRange) {
 			
 			strideDuration = getStrideDuration();
+			double strideLength;
 			
 			if (strideDuration != Double.NaN && strideDuration <= MAX_STRIDE_DURATION && strideDuration >= MIN_STRIDE_DURATION) {
 				notifyOnStep(new StepEvent(1.0, strideDuration));
-				Log.d("Stride Length", Double.valueOf(new StrideLengthEstimator(1.76).getStrideLengthFromDuration(strideDuration)).toString());
+				strideLength = new StrideLengthEstimator(1.76).getStrideLengthFromDuration(strideDuration);
+				/* Round to 4 decimal places */
+				strideLength = strideLength * 10000;
+				strideLength = Math.round(strideLength);
+				strideLength =  strideLength / 10000;
+				Log.d("StrideLengthTest", Double.valueOf(strideLength).toString());
 			}
 			else {
 				Log.d("Invalid Stride Duration", "Stride Duration NaN!");

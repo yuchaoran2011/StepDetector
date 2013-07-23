@@ -33,14 +33,13 @@ public class StrideLengthEstimator {
 	 */
 	public double getStrideLengthFromDuration(double duration) {
 		//return factor * (0.3608 + 0.1639 / duration) * DEFAULT_STRIDE_LENGTH;
+		
 		Random ranGen= new Random();
-		double standardNoise = ranGen.nextGaussian(); 
-		double zScore = 0.15;
-		double correctedNoise = standardNoise * zScore; 
-		double strideLength = height * 0.415 + correctedNoise;
-		if (strideLength <= 1.0)
-			return strideLength;
+		double gaussianNoise = ranGen.nextGaussian() * 0.15;  // http://www.javamex.com/tutorials/random_numbers/gaussian_distribution_2.shtml 
+		double strideLength = height * 0.415 + gaussianNoise;
+		if (strideLength < 0.1)
+			return height * 0.415;
 		else 
-			return Double.NaN;
+			return strideLength;
 	}
 }
