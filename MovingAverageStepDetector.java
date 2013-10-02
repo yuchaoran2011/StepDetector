@@ -26,6 +26,8 @@ public class MovingAverageStepDetector extends StepDetector {
 	private long mLastStepTimestamp;
 	private double strideDuration;
 	
+	public double stepLength;
+	
 	private static final long SECOND_IN_NANOSECONDS = (long) Math.pow(10, 9);
 	public static final double MA1_WINDOW = 0.2;
 	public static final double MA2_WINDOW = 5 * MA1_WINDOW;
@@ -93,7 +95,7 @@ public class MovingAverageStepDetector extends StepDetector {
 		return mHighPowerCutoff;
 	}
 
-	private void processAccelerometerValues(long timestamp, float[] values) {
+	private double processAccelerometerValues(long timestamp, float[] values) {
 
 		float value = values[2];
 
@@ -128,10 +130,12 @@ public class MovingAverageStepDetector extends StepDetector {
 
 		// step event
 		if (stepDetected && signalPowerOutOfRange) {
-			if (maValues[3] < mLowPowerCutoff)
-				Log.d("Invalid Step", "Power too low!");
-			if (maValues[3] > mHighPowerCutoff)
-				Log.d("Invalid Step", "Power too high!");
+			if (maValues[3] < mLowPowerCutoff) {
+				//Log.d("Invalid Step", "Power too low!");
+			}
+			if (maValues[3] > mHighPowerCutoff) {
+				//Log.d("Invalid Step", "Power too high!");
+			}
 		}
 		
 		
@@ -148,11 +152,14 @@ public class MovingAverageStepDetector extends StepDetector {
 				strideLength = Math.round(strideLength);
 				strideLength =  strideLength / 10000;
 				Log.d("StrideLengthTest", Double.valueOf(strideLength).toString());
+				return strideLength;
 			}
 			else {
 				Log.d("Invalid Stride Duration", "Stride Duration NaN!");
+				return -10;
 			}
 		}
+		return -10;
 
 	}
 
@@ -181,7 +188,7 @@ public class MovingAverageStepDetector extends StepDetector {
 		// values[1] + ", z: " + values[2]);
 		synchronized (this) {
 			if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				processAccelerometerValues(event.timestamp, event.values);
+				stepLength = processAccelerometerValues(event.timestamp, event.values);
 			}
 		}
 	}

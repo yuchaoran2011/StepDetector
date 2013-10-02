@@ -36,7 +36,9 @@ public class StrideLengthEstimator {
 		
 		Random ranGen= new Random();
 		double gaussianNoise = ranGen.nextGaussian() * 0.15;  // http://www.javamex.com/tutorials/random_numbers/gaussian_distribution_2.shtml 
-		double strideLength = height * 0.415 + gaussianNoise;
+		//double strideLength = height * 0.415 + gaussianNoise;
+		// double strideLength = height * 0.55 + gaussianNoise; too short
+		double strideLength = height * 0.555 + gaussianNoise;
 		if (strideLength < 0.1)
 			return height * 0.415;
 		else 
