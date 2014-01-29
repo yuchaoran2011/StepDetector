@@ -104,12 +104,12 @@ public class StepDetectionDemo extends Activity {
 					e.printStackTrace();
 				}
 				try {
-					lowPowerCutoff = Double.valueOf(prefs.getString("step_detection_low_power_cutoff_preference", "2000"));
+					lowPowerCutoff = Double.valueOf(prefs.getString("step_detection_low_power_cutoff_preference", "200"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
 				try {
-					highPowerCutoff = Double.valueOf(prefs.getString("step_detection_upper_power_cutoff_preference", "90000"));
+					highPowerCutoff = Double.valueOf(prefs.getString("step_detection_upper_power_cutoff_preference", "20000"));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}

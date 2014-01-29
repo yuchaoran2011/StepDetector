@@ -34,8 +34,8 @@ public class MovingAverageStepDetector extends StepDetector {
 	@SuppressWarnings("unused")
 	private static final long POWER_WINDOW = SECOND_IN_NANOSECONDS / 10;
 	
-	public static final float LOW_POWER_CUTOFF_VALUE = 2000.0f;
-	public static final float HIGH_POWER_CUTOFF_VALUE = 90000.0f;
+	public static final float LOW_POWER_CUTOFF_VALUE = 500.0f;   //2000.0f // 200 for vertical 45 degrees with wall
+	public static final float HIGH_POWER_CUTOFF_VALUE = 500000.0f;  // 90000.0f  // 100000000
 	
 	
 	private static final double MAX_STRIDE_DURATION = 2.0; // in seconds
@@ -123,12 +123,14 @@ public class MovingAverageStepDetector extends StepDetector {
 		// maValues[3] = (float)sp.getPower();
 		maValues[3] = (float) asp.getValue();
 		signalPowerOutOfRange = (maValues[3] < mLowPowerCutoff) || (maValues[3] > mHighPowerCutoff);
+		// signalPowerOutOfRange = (maValues[3] < mLowPowerCutoff);
 
 		if (stepDetected) {
 			asp.reset();
 		}
 
 		// step event
+		/*
 		if (stepDetected && signalPowerOutOfRange) {
 			if (maValues[3] < mLowPowerCutoff) {
 				//Log.d("Invalid Step", "Power too low!");
@@ -136,7 +138,7 @@ public class MovingAverageStepDetector extends StepDetector {
 			if (maValues[3] > mHighPowerCutoff) {
 				//Log.d("Invalid Step", "Power too high!");
 			}
-		}
+		}*/
 		
 		
 		if (stepDetected && !signalPowerOutOfRange) {
